@@ -1,0 +1,210 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/*
+  Commodity Intelligence Terminal — design tokens.
+
+  Foundation is #05081C. Depth comes from small steps in surface colour rather
+  than shadows, and borders stay near the noise floor so panels read as one
+  continuous terminal instead of a grid of cards. Green/red are reserved for
+  market direction; system state uses teal/cyan.
+*/
+@theme {
+  /* Surface hierarchy: page → chrome → panel → card → nested → hover. */
+  --color-terminal: #05081c;
+  --color-terminal-deep: #03050f;
+  --color-sidebar: #060b1f;
+  --color-nav: #060a1d;
+  --color-panel: #080d24;
+  --color-panel-raised: #0a1027;
+  --color-panel-nested: #0c132c;
+  --color-panel-hover: #101936;
+  --color-row-alt: #070c22;
+  --color-track: #0c132c;
+
+  /*
+    Default borders are a translucent tint so they sit just above the surface
+    they divide; -strong is reserved for selection, focus and alert states.
+  */
+  --color-hairline: rgb(96 126 178 / 0.16);
+  --color-hairline-strong: #22314f;
+
+  --color-ink: #e8eef8;
+  --color-ink-muted: #93a0ba;
+  --color-ink-dim: #64718e;
+
+  --color-bull: #2dd49a;
+  --color-bear: #ff5a68;
+  --color-warn: #e8a33f;
+  --color-info: #4cb9e8;
+  --color-teal: #3bb0a6;
+  --color-neutral-quote: #6f7c99;
+  --color-accent: #4cb9e8;
+
+  /* Low-opacity washes: legible over any panel step, never a filled block. */
+  --color-bull-soft: rgb(45 212 154 / 0.1);
+  --color-bear-soft: rgb(255 90 104 / 0.1);
+  --color-warn-soft: rgb(232 163 63 / 0.1);
+  --color-info-soft: rgb(76 185 232 / 0.1);
+  --color-teal-soft: rgb(59 176 166 / 0.1);
+
+  /* Market-score bands: institutional, deliberately not a traffic light. */
+  --color-band-strong-bear: #5a2230;
+  --color-band-bear: #6b3a3c;
+  --color-band-neutral: #33415e;
+  --color-band-bull: #235e5c;
+  --color-band-strong-bull: #2a6b4e;
+
+  /* shadcn/ui compatibility tokens */
+  --color-background: var(--color-terminal);
+  --color-foreground: var(--color-ink);
+  --color-card: var(--color-panel);
+  --color-card-foreground: var(--color-ink);
+  --color-popover: #0a1027;
+  --color-popover-foreground: var(--color-ink);
+  --color-primary: #131c38;
+  --color-primary-foreground: #e8eef8;
+  --color-secondary: #0c132c;
+  --color-secondary-foreground: var(--color-ink);
+  --color-muted: #0c132c;
+  --color-muted-foreground: var(--color-ink-muted);
+  --color-border: var(--color-hairline);
+  --color-input: var(--color-hairline-strong);
+  --color-ring: #2c5e80;
+  --color-destructive: var(--color-bear);
+
+  --font-sans:
+    ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-mono:
+    ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+
+  --radius-panel: 0.1875rem;
+
+  /* Depth is carried by surface colour; shadows only stop overlays floating. */
+  --shadow-panel: 0 1px 0 0 rgb(255 255 255 / 0.015);
+  --shadow-float: 0 18px 40px -24px rgb(0 0 0 / 0.85);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-hairline);
+  }
+
+  html {
+    color-scheme: dark;
+    background-color: var(--color-terminal);
+  }
+
+  body {
+    background-color: var(--color-terminal);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 12.5px;
+    line-height: 1.38;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Terminal-grade scrollbars: present but visually quiet. */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #16203a;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #22314f;
+  }
+
+  ::selection {
+    background: #1b3a52;
+    color: #e8eef8;
+  }
+}
+
+@layer components {
+  /* Numeric cells: monospace with aligned digits. */
+  .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+
+  .panel {
+    background-color: var(--color-panel);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-panel);
+  }
+
+  /* Tier-1 surfaces sit one step brighter than the rest of the page. */
+  .panel-primary {
+    background-color: var(--color-panel-raised);
+  }
+
+  /* Restrained glass treatment, reserved for overlays and the header. */
+  .panel-glass {
+    background-color: rgb(6 10 29 / 0.88);
+    backdrop-filter: blur(14px) saturate(130%);
+    border: 1px solid var(--color-hairline);
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    border-bottom: 1px solid var(--color-hairline);
+  }
+
+  .label-caps {
+    font-size: 9.5px;
+    line-height: 1.1;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+  }
+
+  /* Dominant numeric readout used for headline quotes. */
+  .quote-value {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  /* Secondary metadata: source, frequency, observation age. */
+  .meta-quiet {
+    font-size: 9px;
+    line-height: 1.2;
+    letter-spacing: 0.06em;
+    color: var(--color-ink-dim);
+  }
+
+  .grid-lines {
+    background-image:
+      linear-gradient(to right, rgb(255 255 255 / 0.015) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(255 255 255 / 0.015) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+}
+
+@layer utilities {
+  .text-2xs {
+    font-size: 10px;
+    line-height: 1.25;
+  }
+  .text-3xs {
+    font-size: 9px;
+    line-height: 1.2;
+  }
+}
