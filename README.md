@@ -1,294 +1,167 @@
-# Commodity Intelligence Terminal (CIT)
+<div align="center">
 
-An interactive commodity market intelligence terminal integrating market
-observations, price trends, supply-demand indicators, source tracking, policy
-monitoring, risk analysis, and research reports.
+# Commodity Intelligence Platform (CIT)
 
-## Live Interactive Dashboard
+### A data-driven intelligence terminal for interconnected commodity markets.
 
-_Public HTTPS demo URL will be inserted here after Vercel Hobby deployment is
-verified. See [docs/PUBLIC_DEMO_DEPLOYMENT.md](./docs/PUBLIC_DEMO_DEPLOYMENT.md)._
+Track market indicators, explore price history, examine supply–demand signals, and turn fragmented information into structured, traceable market research.
 
-Local full app (SQLite + scheduler):
+[**Launch the Interactive Dashboard**](https://commodity-intelligence-cit.netlify.app/) · [Explore the Architecture](#system-architecture) · [Run Locally](#run-locally)
 
-```bash
-npm install
-npm run dev        # http://localhost:3000 → redirects to /sulphur/overview
-```
+![Next.js](https://img.shields.io/badge/Next.js-16-111827?logo=nextdotjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-Application-3178C6?logo=typescript&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-Local--first-0C6E9A?logo=sqlite&logoColor=white)
+![Deployment](https://img.shields.io/badge/Demo-Netlify-00AD9F?logo=netlify&logoColor=white)
+![Access](https://img.shields.io/badge/Public%20Demo-Read--only-64748B)
 
-Public read-only demo mode (snapshot-backed, no SQLite writes):
+</div>
 
-```bash
-npm run export:public-demo   # refresh public-data/snapshot.json from local DB
-npm run build:public-demo
-npm run start:public-demo    # http://localhost:3001
-```
+---
 
-Other commands:
+## Live Product
 
-```bash
-npm run build      # production build (full local app)
-npm start          # run the production build
-npm run typecheck  # tsc --noEmit
-npm run lint       # eslint
-node scripts/inspect-db.mjs   # print a summary of the local database
-```
+**[Open CIT → Interactive Market Dashboard](https://commodity-intelligence-cit.netlify.app/)**
 
-### Data transparency (public demo)
+CIT is a working web application, not a static portfolio mockup. The hosted version uses the existing Next.js interface with **interactive charts, commodity navigation, indicator exploration, and saved market analysis**.
 
-The public deployment serves a validated read-only snapshot. Observation dates
-are the stored market timestamps, not the snapshot export time. Live ingestion,
-manual edits, admin settings, and cloud AI calls are disabled. Details:
-[docs/PUBLIC_DEMO_LIMITATIONS.md](./docs/PUBLIC_DEMO_LIMITATIONS.md).
+> **Public-demo boundary:** The hosted site reads a validated, read-only data snapshot. It does **not** run continuous cloud ingestion, database writes, administrator actions, or on-demand cloud AI. Some historical sulphur observations are **seeded/synthetic**, and some values are manual or stale. Always check the observation date and source before drawing conclusions.
 
-Node 22 or newer is required, because the persistence layer uses the built-in
-`node:sqlite` module.
+## Dashboard Preview
 
-## Architecture
+[![CIT dashboard showing sulphur market score, price cards and an interactive history chart](docs/assets/cit-dashboard.png)](https://commodity-intelligence-cit.netlify.app/)
 
-```
-src/
-  adapters/                 data-source adapters (ecb-fx, brent, wti, policy, …)
-  app/
-    [commodityId]/          overview, prices, supply, demand, shipping,
-                            policy, reports, manual-input
-    system/                 data-sources, health, settings
-  components/               charts, market panels, tables, forms, layout, ui
-  config/
-    commodities/            per-commodity configuration (sulphur, crude-oil, …)
-    nav.ts, events.ts
-  lib/
-    db/                     client, migrations, repositories, seed
-    engines/                statistics, derived, market-score, drivers,
-                            spreads, quality, alerts, report
-    data-sources/           adapter interface + official/public-web/derived
-    analysis/               provider abstraction (local-template, cloud)
-    bootstrap.ts            migrate + seed + recompute on every server start
-    scheduler.ts            local background scheduler
-  server/
-    queries.ts              server-side read layer → view models
-    actions.ts              server actions (the only write path from the UI)
-  types/                    db.ts (storage), view.ts (UI view models)
-data/commodity-terminal.db  the local database
-```
+*Actual CIT public-demo interface · Sulphur overview. Click the image to explore the deployed application. Displayed market figures are illustrative or historical where indicated by their provenance; they are not guaranteed live quotations.*
 
-The layering rule is strict: components never touch SQL. Pages call
-`src/server/queries.ts`, which reads through repositories, runs the engines and
-returns plain serialisable view models. Every write goes through a server action
-in `src/server/actions.ts`, which revalidates the affected routes so server
-components re-read the database. Market history is never held in React state.
+## What CIT Does
 
-### Why `node:sqlite` instead of Prisma
-
-Prisma would add a code-generation step, a downloaded query engine and a
-migration CLI to a tool that is meant to be cloned and run offline. `node:sqlite`
-ships with Node 22, needs no native compilation, and works with a plain
-`npm install`. `src/lib/db/repositories.ts` provides the typed boundary an ORM
-would otherwise give us: it is the only file in the project containing SQL.
-
-## Database
-
-Location: `data/commodity-terminal.db` (override with `CIT_DATABASE_PATH`).
-Migrations live in `src/lib/db/migrations.ts` as an ordered, idempotent list and
-are applied automatically on first access; applied ids are recorded in
-`_migrations`.
-
-| Table | Purpose |
+| Capability | What you can explore |
 | --- | --- |
-| `commodities` | Tracked commodities |
-| `sources` | Data-source registry, including automation level and schedule |
-| `indicators` | Per-commodity series definitions (type, unit, frequency) |
-| `observations` | Every stored value, with source, quality and manual flag |
-| `market_events` | Policy, supply, shipping and demand events |
-| `alert_rules` / `alerts` | Rule definitions and triggered alerts |
-| `daily_reports` | Generated reports, including the full JSON payload |
-| `data_fetch_logs` | One row per adapter run |
-| `settings` | Score weights, report time, AI and adapter configuration |
+| **Multi-commodity workspace** | Configurable commodity views, including sulphur, crude oil, natural gas and macro indicators; additional industries can be registered without rebuilding the core UI. |
+| **Price intelligence** | Interactive price series, history ranges, trend and momentum views, comparative benchmarks, spreads and import-cost analysis. |
+| **Supply, demand & logistics** | Inventory, downstream utilization, shipping, import-cost and other commodity-specific indicators where data is available. |
+| **Market drivers & risk** | Transparent market scoring, directional drivers, risk categories, conditional scenarios and rule-based outlooks. |
+| **Provenance & quality** | Observation dates, source classification, freshness warnings, manual/derived status and anomaly checks. |
+| **Alerts & research** | Rule-based monitoring and structured research reports in the full local application; previously saved outputs can be explored in the public demo. |
 
-Observations are deduplicated on `(indicatorId, timestamp, sourceId)`, so
-re-running an adapter never creates duplicates, and a manual entry never
-overwrites automatic history — it is stored alongside it under `src-manual`.
+### The research workflow
 
-Indicator types: `PRICE`, `INVENTORY`, `SUPPLY`, `DEMAND`, `FREIGHT`,
-`PRODUCTION`, `IMPORT`, `EXPORT`, `POLICY`, `UTILIZATION`, `FX`, `MACRO`,
-`SPREAD`, `DERIVED`. Source types: `OFFICIAL`, `PUBLIC_WEB`, `NEWS`, `MANUAL`,
-`API`, `DERIVED`.
+**Collect → Validate → Normalize → Store → Analyze → Explain → Report**
 
-Seeding (`src/lib/db/seed.ts`) converts the original mock sulphur history into
-real observations on first run. It is versioned and idempotent, and it backdates
-`createdAt` so the "new data today" counters stay honest.
+The purpose is not simply to display commodity prices. CIT connects observations to their underlying market drivers, preserves the evidence behind conclusions, and makes data-quality limitations visible.
 
-## Data ingestion
+## System Architecture
 
-Every adapter implements the same interface (`src/lib/data-sources/base-source.ts`):
-
-```ts
-interface DataSourceAdapter {
-  id: string;
-  name: string;
-  fetch(): Promise<RawDataRecord[]>;
-  normalize(records: RawDataRecord[]): Promise<NormalizedObservation[]>;
-  validate(records: NormalizedObservation[]): ValidationResult;
-  persist(records: NormalizedObservation[]): Promise<void>;
-}
+```mermaid
+flowchart TD
+    A[Public / configured market sources] --> B[Adapters and normalization]
+    B --> C[Validation and provenance]
+    C --> D[(Local SQLite history)]
+    D --> E[Indicators and market analytics]
+    E --> F[Commodity Intelligence Engine]
+    F --> G[Drivers · Risks · Scenarios · Reports]
+    G --> H[Local interactive terminal]
+    D --> I[Validated public snapshot export]
+    G --> I
+    I --> J[Netlify read-only web demo]
 ```
 
-Shipped adapters:
+The system intentionally separates **data collection**, **market calculations**, **intelligence logic**, and **presentation**. The public demo is a deployment mode of the existing application—not a separate mock dashboard.
 
-| Adapter | Kind | Status |
+<details>
+<summary><strong>Engineering architecture & core modules</strong></summary>
+
+| Layer | Implementation |
+| --- | --- |
+| Frontend | Next.js App Router, React, TypeScript, interactive chart and table components |
+| Data access | `src/server/queries.ts` and typed repositories; UI components do not directly query SQL |
+| Persistence | `node:sqlite`, additive migrations, observation history and report storage |
+| Ingestion | Commodity-specific adapters, scheduled checks, normalization, source metadata and quality validation |
+| Analytics | Changes, volatility, market score, price drivers, spreads, import parity and alerts |
+| Intelligence | Driver, risk, confidence, scenario, forecast, research, explanation and market-memory modules |
+| Public delivery | Sanitized JSON snapshot + read-only Next.js deployment on Netlify |
+
+Key directories:
+
+```text
+src/
+  app/                  Next.js commodity and system routes
+  adapters/             Source-specific data integrations
+  components/           Charts, tables and dashboard components
+  config/commodities/   Per-commodity configuration
+  intelligence/         Market intelligence engines
+  lib/db/               SQLite, migrations and repositories
+  lib/engines/          Indicators, scores, quality and alerts
+  lib/public-data/      Snapshot export and read-only provider
+  server/               Query and action boundaries
+scripts/                Data export and developer utilities
+public-data/            Validated public-demo snapshot
+```
+
+</details>
+
+## Two Operating Modes
+
+| | Full local terminal | Public interactive demo |
 | --- | --- | --- |
-| `public-fx-json` | Public JSON endpoint (ECB rates via Frankfurter) | Automated, enabled |
-| `derived-engine` | Recomputes derived indices and score history | Automated, enabled |
-| `public-html-table` | Static HTML table template | Template — configure a URL first |
-| `public-rss` | RSS news → market events in review status | Template — configure a feed first |
-| `manual-required` | Placeholder that logs `MANUAL_REQUIRED` | Manual |
+| Web interface and interactive charts | Yes | Yes |
+| Historical observations and saved reports | SQLite-backed | Snapshot-backed |
+| Data ingestion and scheduling | Runs while local server is active | Disabled |
+| Manual data entry and admin writes | Available locally | Disabled |
+| Intelligence computation | Existing local engines | Existing exported results |
+| Persistent writable database | Local SQLite | No |
 
-Requests go through `politeFetch`, which reads and honours `robots.txt`, applies
-a per-host rate limit and sends an identifiable user agent (`CIT_USER_AGENT`).
-Paywalls, logins, CAPTCHAs and anti-bot protection are never bypassed: a source
-that cannot legally or reliably be automated is marked `MANUAL_REQUIRED` and
-surfaced as such in the registry rather than being faked.
+This distinction is intentional: public visitors can explore the product without receiving privileged access to its data maintenance or execution workflows.
 
-Sulphur sources that are currently manual-only: producer OSP announcements,
-China Customs import volumes, port inventory and Zhenjiang quotations, refinery
-liquid sulphur, downstream utilization, freight, vessel line-ups and domestic
-production. Ready for public-web automation once you supply a permitted URL:
-the benchmark price table and the policy/news RSS feed.
+## Run Locally
 
-## Scheduler
+**Requirements:** Node.js 22+ and npm.
 
-`src/instrumentation.ts` starts `src/lib/scheduler.ts` once per Node server
-process. Every 60 seconds it:
+```bash
+# Full local application
+npm install
+npm run dev
+# Open http://localhost:3000/sulphur/overview
+```
 
-1. runs each enabled source whose `refreshIntervalMinutes` has elapsed,
-2. recomputes derived indicators and market-score history,
-3. re-evaluates alert rules and stores newly triggered alerts,
-4. writes a `data_fetch_logs` row per run,
-5. generates the daily report once the configured time has passed.
+```bash
+# Export and test the read-only public demo using the local database
+npm run export:public-demo
+npm run build:public-demo
+npm run start:public-demo
+# Open http://localhost:3001
+```
 
-Default intervals follow the publication cadence: news and public price pages
-30–60 minutes, official and government pages 3 hours, port inventory and
-utilization 6 hours, customs and monthly OSP 24 hours. Per-source overrides live
-in the Data Sources screen. **REFRESH NOW** in the header forces every source.
+Useful checks:
 
-If the app was closed at report time, the missed report is generated the next
-time the server starts.
+```bash
+npm run typecheck
+npm run lint
+npm run build
+node scripts/inspect-db.mjs
+```
 
-## Analytics
+The export command requires an existing local database and is not a substitute for automatic data collection in the hosted environment. Database files and secrets must not be committed to Git.
 
-**Statistics** (`engines/statistics.ts`) computes current, previous, absolute and
-percentage change, 7/30/90-day changes, ranges, averages, high, low, distance
-from high, annualised volatility, trend and momentum. Lookbacks are calendar
-based, so weekly and monthly series are handled correctly. Nothing is hard-coded.
+## Data Integrity & Limitations
 
-**Trend** is classified from the 7- and 30-day slope (`STRONG UP`, `UP`,
-`SIDEWAYS`, `DOWN`, `STRONG DOWN`); **momentum** compares the recent slope with
-the prior one (`ACCELERATING`, `STABLE`, `DECELERATING`, `REVERSING`);
-**volatility** buckets annualised standard deviation (`LOW`, `MODERATE`, `HIGH`,
-`EXTREME`). Every panel exposes the method in a tooltip.
+- **Not a live-price feed:** The public build exposes a dated snapshot; the export timestamp is not the market observation timestamp.
+- **Synthetic data:** Seeded sulphur history exists for development and demonstration and must not be interpreted as verified historical market assessments.
+- **Source coverage varies:** Some adapters retrieve public data; certain physical commodity benchmarks and downstream indicators require manual updates or licensed access.
+- **Model outputs are conditional:** Market scores, risk levels and scenario outlooks are research tools, not calibrated price probabilities or investment recommendations.
+- **No privileged public operations:** Public visitors cannot write data, change admin settings, start ingestion jobs or invoke unrestricted cloud AI.
 
-**Market score** (`engines/market-score.ts`) is a weighted blend of factors
-defined in the commodity config — for sulphur: global price pressure 20%, China
-import cost 20%, supply tightness 20%, domestic price strength 15%, demand
-strength 15%, freight 5%, policy risk 5%. Each factor maps its measured input
-onto 0–100, weights are normalised, and the result bands into
-STRONG BEARISH / BEARISH / NEUTRAL / BULLISH / STRONG BULLISH. Weights are
-editable in Settings and stored in the `settings` table.
+See [Public Demo Limitations](docs/PUBLIC_DEMO_LIMITATIONS.md), [Public Demo Deployment](docs/PUBLIC_DEMO_DEPLOYMENT.md), [Architecture](ARCHITECTURE.md) and [CIE Documentation](docs/CIE.md).
 
-**Price drivers** (`engines/drivers.ts`) build Supply, Inventory, Demand,
-Freight, Policy and FX scores from the underlying indicators. Expanding a driver
-shows each component's raw input, normalised score, weight and weighted
-contribution.
+## Direction of Development
 
-**Spreads and import parity** (`engines/spreads.ts`) chart historical spreads and
-build the landed-cost stack: FOB + freight + insurance + FX + port costs +
-financing + other costs → estimated China landed cost, then domestic price minus
-landed cost → import arbitrage spread.
+The next priorities are to expand **verified public market coverage**, automate safe snapshot refreshes, strengthen **industry-chain relationships**, and validate intelligence signals against reliable historical data—without compromising source provenance or reproducibility.
 
-**Quality** (`engines/quality.ts`) assigns `VERIFIED`, `NORMAL`, `ESTIMATED`,
-`STALE`, `CONFLICT` or `MANUAL`, and flags order-of-magnitude jumps as a possible
-unit or parsing error instead of accepting them silently. Freshness (`LIVE`,
-`FRESH`, `STALE`, `MANUAL`, `NO DATA`) is measured against each indicator's
-expected publication frequency, never against wall-clock time — a weekly
-assessment three days old is FRESH, not stale.
+---
 
-## Alerts
+<div align="center">
 
-`engines/alerts.ts` evaluates the rules stored in `alert_rules`:
+**From fragmented commodity observations to explainable market intelligence.**
 
-- `THRESHOLD` — e.g. CFR China above $1,030, port inventory below 80 万吨
-- `CHANGE_PCT` — e.g. CFR China weekly change above 5%
-- `CONSECUTIVE_MOVE` — e.g. Middle East FOB falling two periods running
-- `COMPOUND_REVERSAL` — CFR China and Middle East FOB declining **and** port
-  inventory rising **and** MAP/DAP utilization weakening
-- `FRESHNESS` — an indicator has gone stale relative to its frequency
+[**Explore CIT Live ↗**](https://commodity-intelligence-cit.netlify.app/)
 
-Each alert carries a fingerprint, so re-evaluation is idempotent. High and
-critical alerts also raise a browser notification when permission is granted;
-everything appears in the in-app Alert Center regardless.
-
-## Daily report
-
-`engines/report.ts` builds the payload from database values only: market score
-and change, latest observation changes, 7- and 30-day trends, price ranges,
-supply, inventory, demand, freight, policy events, largest positive and negative
-drivers, reversal signals, what changed since the previous report and what to
-watch next. Narrative commentary is produced separately by the analysis provider
-and stored in its own slot, so switching to a cloud model never changes a number.
-Reports are stored in `daily_reports` with the full payload; the Reports page
-lists history and compares today against roughly seven days ago.
-
-## Extending the terminal
-
-**Add a commodity.** Create `src/config/commodities/<id>.ts` exporting a
-`CommodityConfig` (indicators, sources, drivers, score factors, alert rules,
-spreads, import parity, optional derived formulas) and register it in
-`src/config/commodities/index.ts`. The schema, engines and pages need no changes.
-
-**Add an indicator.** Either add an `IndicatorConfig` entry to the commodity
-config, or create it at runtime from the Manual Input page — the form writes
-directly to the `indicators` table.
-
-**Add a public data source.** Add a `SourceConfig` to the commodity config with
-an `adapterId`, then implement the adapter under
-`src/lib/data-sources/public-web/` and register it in
-`src/lib/data-sources/index.ts`. Confirm the site's terms and `robots.txt` permit
-automated access before enabling it; otherwise set
-`automation: "MANUAL_REQUIRED"`.
-
-**Add a manual observation.** Manual Input → pick indicator, date, value,
-source and notes. The value is stored with quality `MANUAL`, displayed with a
-MANUAL badge, and never overwrites automatic history.
-
-**Connect a paid API later.** Add a `SourceConfig` with
-`sourceType: "API"` and `requiresPaidAccess: true`, implement the adapter against
-the same `DataSourceAdapter` interface, and read the credential from an
-environment variable. Nothing else changes: the scheduler, dedup, quality checks
-and provenance already work for any adapter.
-
-**Connect Cloud AI later.** Copy `.env.example` to `.env.local`, set
-`AI_PROVIDER=cloud`, `AI_API_KEY`, `AI_MODEL` and optionally `AI_BASE_URL` (any
-OpenAI-compatible chat completions endpoint), then select the cloud provider in
-Settings. The provider receives a bounded JSON context — prices, changes, ranges,
-inventory, supply, demand, freight, events, score, alerts and spreads — never the
-database. Any failure or missing key falls back to the local template.
-
-**Back up the database.** Settings → Data → **BACK UP DATA** checkpoints the WAL
-and writes `data/backups/commodity-terminal-backup-<timestamp>.db`. The same
-panel exports any indicator's full history as CSV. Copying
-`data/commodity-terminal.db` while the app is stopped works just as well.
-
-## Limitations
-
-- Only two sources are automated out of the box: the public FX endpoint and the
-  internal derived engine. Everything else is deliberately manual or a template,
-  because the underlying publishers either require a subscription or do not
-  permit automated access.
-- Seeded sulphur history is synthetic. It is realistic and anchored to plausible
-  headline levels, but it is not a market assessment; replace it with real
-  observations before relying on the numbers.
-- The scheduler runs inside the Next.js server process, so nothing is fetched
-  while the app is stopped. Missed daily reports are generated on the next start;
-  missed fetches simply happen at the next tick.
-- Event classification from RSS is keyword based and lands in `REVIEW` status
-  with its source URL stored. It is a triage aid, not a decision.
+</div>
