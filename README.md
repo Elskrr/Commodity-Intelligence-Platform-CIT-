@@ -6,7 +6,7 @@
 
 Track market indicators, explore price history, examine supply–demand signals, and turn fragmented information into structured, traceable market research.
 
-[**Launch the Interactive Dashboard**](https://commodity-intelligence-cit.netlify.app/) · [Explore the Architecture](#system-architecture) · [Run Locally](#run-locally)
+[**Launch Live Dashboard**](https://commodity-intelligence-cit.netlify.app/) · [Why CIT](#why-we-built-cit) · [Dashboard Design](#how-the-dashboard-is-organized) · [Architecture](#system-architecture) · [Run Locally](#run-locally)
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-111827?logo=nextdotjs&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-Application-3178C6?logo=typescript&logoColor=white)
@@ -22,7 +22,7 @@ Track market indicators, explore price history, examine supply–demand signals,
 
 **[Open CIT → Interactive Market Dashboard](https://commodity-intelligence-cit.netlify.app/)**
 
-CIT is a working web application, not a static portfolio mockup. The hosted version uses the existing Next.js interface with **interactive charts, commodity navigation, indicator exploration, and saved market analysis**.
+CIT is a working web application, not a static portfolio mockup. The hosted version uses the existing Next.js interface with **interactive charts, commodity navigation, indicator exploration, and saved market analysis**. It is intended for hands-on exploration, not as a live trading or price-assessment service.
 
 > **Public-demo boundary:** The hosted site reads a validated, read-only data snapshot. It does **not** run continuous cloud ingestion, database writes, administrator actions, or on-demand cloud AI. Some historical sulphur observations are **seeded/synthetic**, and some values are manual or stale. Always check the observation date and source before drawing conclusions.
 
@@ -31,6 +31,56 @@ CIT is a working web application, not a static portfolio mockup. The hosted vers
 [![CIT dashboard showing sulphur market score, price cards and an interactive history chart](docs/assets/cit-dashboard.png)](https://commodity-intelligence-cit.netlify.app/)
 
 *Actual CIT public-demo interface · Sulphur overview. Click the image to explore the deployed application. Displayed market figures are illustrative or historical where indicated by their provenance; they are not guaranteed live quotations.*
+
+## Why We Built CIT
+
+CIT started with a practical market-research problem: **how do global sulphur supply, international benchmark prices, China’s import costs, port inventory, downstream fertilizer demand, shipping conditions and policy developments interact to shape the domestic market?**
+
+The information needed to answer that question rarely comes from a single feed. Prices, trade statistics, inventory updates, government announcements and industry utilization data arrive from different publishers, at different frequencies, in different units and with different licensing constraints. A conventional price dashboard displays the numbers, but still leaves the user to reconstruct the market story.
+
+**Our design goal was to connect fragmented observations to a structured, explainable research workflow**—while making the source, observation date and limitations of each conclusion visible. We built the terminal around four questions:
+
+1. **What changed?** Track historical observations, trends and changes across benchmarks.
+2. **What is driving it?** Examine supply, demand, inventory, logistics, FX and policy signals together.
+3. **How strong is the evidence?** Preserve provenance and freshness instead of treating all figures as equally reliable.
+4. **What should be watched next?** Use driver rankings, conditional scenarios, alerts and research reports to organize follow-up analysis.
+
+Sulphur is the starting point, not a hard-coded limit: the commodity configuration layer is designed to support adjacent energy, fertilizer, coal-chemical and petrochemical markets using the same core engines.
+
+## How the Dashboard Is Organized
+
+Instead of a marketing-style landing page, the application opens directly into a **dense, research-oriented workspace**. Each part of the interface has an analytical purpose:
+
+| Dashboard area | Why it exists |
+| --- | --- |
+| **Commodity navigator** | Move across related markets without losing the common analysis framework. |
+| **Market score & factor decomposition** | Start with a compact market-state summary, then inspect the weighted drivers behind it. |
+| **Benchmark, inventory & utilization cards** | Keep import pricing, domestic quotations, stock levels and downstream demand in the same field of view. |
+| **Interactive time-series charts** | Test whether a movement is recent, persistent or at odds with another indicator. |
+| **Supply / Demand / Shipping / Policy tabs** | Follow a specific hypothesis into the underlying market evidence. |
+| **Reports, source and freshness labels** | Separate a research interpretation from the observations—and dates—that support it. |
+
+The page is built from reusable **Next.js App Router + React components** for charts, tables, cards and navigation. The read layer returns consistent view models, while the data/analytics layers remain separate from presentation. That separation makes it possible to serve the same interface from a local SQLite database or a sanitized, read-only public snapshot.
+
+### The reasoning behind the market model
+
+A change in Middle East FOB quotations may affect China’s import cost, but domestic price formation can also depend on port inventory, landed freight, exchange rates and downstream operating rates. **A higher upstream price is not, by itself, proof of a bullish domestic market.**
+
+CIT therefore uses a layered workflow: **observations → normalized indicators → transparent factor scores → market drivers and risks → conditional scenarios → research output.** The market score provides an orientation, not a substitute for the supporting evidence; the intelligence engine is designed to expose assumptions and uncertainties rather than manufacture certainty.
+
+<details>
+<summary><strong>Engineering decisions and trade-offs</strong></summary>
+
+| Decision | Rationale |
+| --- | --- |
+| **Source-first adapters** | Each publisher has different formats, schedules and access rules; adapters isolate collection from analysis. |
+| **SQLite for the full local terminal** | Lightweight, persistent history with migrations, without operating a separate database server for a single-user research workstation. |
+| **Explicit provenance and quality** | Avoid conflating manual entries, seeded history, verified public observations and proxy indicators. |
+| **Rule-based intelligence before price ML** | Provide inspectable drivers and scenarios without claiming model accuracy unsupported by reliable training and backtest data. |
+| **Multi-commodity configuration** | Reuse core logic while keeping commodity-specific indicators, supply chains and driver weights configurable. |
+| **Public read-only snapshot mode** | Share the real interactive interface online without exposing local database writes, scheduling controls or paid AI keys. |
+
+</details>
 
 ## What CIT Does
 
