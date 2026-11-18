@@ -2,216 +2,168 @@
 
 # Commodity Intelligence Platform (CIT)
 
-### A data-driven intelligence terminal for interconnected commodity markets.
+**A research-first terminal for interconnected commodity markets.**
 
-Track market indicators, explore price history, examine supply–demand signals, and turn fragmented information into structured, traceable market research.
+From fragmented market observations to traceable indicators, explainable drivers, and structured market research.
 
-[**Launch Live Dashboard**](https://commodity-intelligence-cit.netlify.app/) · [Why CIT](#why-we-built-cit) · [Dashboard Design](#how-the-dashboard-is-organized) · [Architecture](#system-architecture) · [Run Locally](#run-locally)
+[![Open Live CIT](https://img.shields.io/badge/OPEN_LIVE_DASHBOARD-Explore_CIT-16BFA8?style=for-the-badge&logo=netlify&logoColor=white)](https://commodity-intelligence-cit.netlify.app/)
 
-![Next.js](https://img.shields.io/badge/Next.js-16-111827?logo=nextdotjs&logoColor=white)
+[![Next.js](https://img.shields.io/badge/Next.js-16-111827?logo=nextdotjs&logoColor=white)](https://nextjs.org/)
 ![TypeScript](https://img.shields.io/badge/TypeScript-Application-3178C6?logo=typescript&logoColor=white)
-![SQLite](https://img.shields.io/badge/SQLite-Local--first-0C6E9A?logo=sqlite&logoColor=white)
-![Deployment](https://img.shields.io/badge/Demo-Netlify-00AD9F?logo=netlify&logoColor=white)
-![Access](https://img.shields.io/badge/Public%20Demo-Read--only-64748B)
+![SQLite](https://img.shields.io/badge/SQLite-Local_First-0C6E9A?logo=sqlite&logoColor=white)
+![Public demo](https://img.shields.io/badge/Netlify-Read_Only_Demo-64748B?logo=netlify&logoColor=white)
+
+**[Launch the public interactive dashboard](https://commodity-intelligence-cit.netlify.app/)** · [Product tour](#01--a-visual-tour-of-the-terminal) · [Design thinking](#02--why-the-terminal-looks-like-this) · [Architecture](#04--how-the-platform-works) · [Local setup](#06--run-the-full-system-locally)
 
 </div>
 
 ---
 
-## Live Product
+## Built to explain markets, not just display prices
 
-**[Open CIT → Interactive Market Dashboard](https://commodity-intelligence-cit.netlify.app/)**
+CIT began with a concrete question in **sulphur trading and research**: how do international sulphur quotations, China's landed import costs, port stocks, refinery supply, downstream fertilizer activity, freight, FX and policy changes interact to affect the domestic market?
 
-CIT is a working web application, not a static portfolio mockup. The hosted version uses the existing Next.js interface with **interactive charts, commodity navigation, indicator exploration, and saved market analysis**. It is intended for hands-on exploration, not as a live trading or price-assessment service.
+Those signals come from different publishers and arrive at different frequencies, units and levels of reliability. CIT brings them into a single research workflow that asks **what changed, what might be driving it, how reliable the evidence is, and what should be watched next**. The terminal uses a configurable foundation that can be extended to energy, fertilizer and petrochemical markets.
 
-> **Public-demo boundary:** The hosted site reads a validated, read-only data snapshot. It does **not** run continuous cloud ingestion, database writes, administrator actions, or on-demand cloud AI. Some historical sulphur observations are **seeded/synthetic**, and some values are manual or stale. Always check the observation date and source before drawing conclusions.
+> **About the public demo:** This is the actual interactive Next.js application running in **read-only snapshot mode**, not a mockup. The hosted demo does not continuously ingest data or permit database/admin writes. **Some displayed sulphur history and event examples are seeded or synthetic, while other observations are manual or stale.** Do not treat the numbers, dated events, scores or outlooks in the screenshots as verified current market assessments or trading advice.
 
-## Dashboard Preview
+## 01 — A visual tour of the terminal
 
-[![CIT dashboard showing sulphur market score, price cards and an interactive history chart](docs/assets/cit-dashboard.png)](https://commodity-intelligence-cit.netlify.app/)
+### A. One screen to orient the research
 
-*Actual CIT public-demo interface · Sulphur overview. Click the image to explore the deployed application. Displayed market figures are illustrative or historical where indicated by their provenance; they are not guaranteed live quotations.*
+The opening view keeps the **commodity navigator, market-state score, regional price benchmarks, port inventories, downstream utilization, and price trend** together. Instead of making the user jump between many disconnected sources, it puts the market's competing signals in one field of view.
 
-## Why We Built CIT
+![Actual CIT Sulphur Overview screenshot — watchlist, market score, price cards and historical chart](docs/assets/cit-overview.png)
 
-CIT started with a practical market-research problem: **how do global sulphur supply, international benchmark prices, China’s import costs, port inventory, downstream fertilizer demand, shipping conditions and policy developments interact to shape the domestic market?**
+*Actual CIT public-demo screenshot · Overview. The screen shows a dated data snapshot; market figures and policy/event examples are not guaranteed real or current.*
 
-The information needed to answer that question rarely comes from a single feed. Prices, trade statistics, inventory updates, government announcements and industry utilization data arrive from different publishers, at different frequencies, in different units and with different licensing constraints. A conventional price dashboard displays the numbers, but still leaves the user to reconstruct the market story.
+**Design choice:** a high-level directional score provides a quick orientation, but the seven factor components and source labels remain visible so the user can inspect what drives the score. A score is **not** a calibrated probability of a future price move.
 
-**Our design goal was to connect fragmented observations to a structured, explainable research workflow**—while making the source, observation date and limitations of each conclusion visible. We built the terminal around four questions:
+### B. Follow the price, then inspect the drivers
 
-1. **What changed?** Track historical observations, trends and changes across benchmarks.
-2. **What is driving it?** Examine supply, demand, inventory, logistics, FX and policy signals together.
-3. **How strong is the evidence?** Preserve provenance and freshness instead of treating all figures as equally reliable.
-4. **What should be watched next?** Use driver rankings, conditional scenarios, alerts and research reports to organize follow-up analysis.
+A movement in a quoted price does not explain itself. The history chart adds context through date navigation, moving averages, ranges, momentum and volatility. Below it, the **Price Drivers**, **Observation Impact** and **Key Indices** panels expose competing signals across supply, inventory, demand, freight, policy and FX.
 
-Sulphur is the starting point, not a hard-coded limit: the commodity configuration layer is designed to support adjacent energy, fertilizer, coal-chemical and petrochemical markets using the same core engines.
+![Actual CIT price-history chart, driver decomposition and market indicators](docs/assets/cit-price-drivers.png)
 
-## How the Dashboard Is Organized
+*Actual CIT screenshot · Historical chart and driver analysis, cropped from the provided live interface for legibility.*
 
-Instead of a marketing-style landing page, the application opens directly into a **dense, research-oriented workspace**. Each part of the interface has an analytical purpose:
+**Why it matters:** a rise in Middle East FOB may push up import costs, while growing Chinese port stocks may put pressure on domestic prices. The system is designed to present these signals together rather than mistake a single benchmark move for a complete explanation.
 
-| Dashboard area | Why it exists |
+### C. Move from signals to a research narrative
+
+The interpretation layer joins **Policy & Events** with **Market Analysis**, directional outlooks, upside and downside risks, and a focused **What to Watch Next** list. This connects the measured indicators to questions that an analyst can investigate further.
+
+![Actual CIT policy and events panel next to market analysis and research outlooks](docs/assets/cit-policy-research.png)
+
+*Actual CIT screenshot · Events and market interpretation. Event examples and confidence labels are part of the historical/illustrative demo data, not independently verified current announcements or calibrated probabilities.*
+
+**Design choice:** event tracking, driver reasoning and research commentary are separate from the observations that support them. An event in review, a low-quality indicator or a stale manual quote should not be treated as an established causal explanation.
+
+## 02 — Why the terminal looks like this
+
+The dashboard is arranged around **four research questions**, not around isolated interface widgets:
+
+![Diagram: orient, observe, explain, investigate — the four-layer dashboard design](docs/assets/cit-interface-logic.png)
+
+- **Orient:** What is the current model-implied market state?
+- **Observe:** Which benchmarks or underlying indicators changed, and when?
+- **Explain:** Which conflicting drivers and source-quality signals might account for those changes?
+- **Investigate:** Which scenarios, risks, events and evidence should be monitored next?
+
+The left sidebar groups related commodities; top-level tabs let the user drill into **Prices, Supply, Demand, Shipping, Policy & Events, and Reports**, while the shared layout preserves context across those investigations.
+
+## 03 — From observations to market interpretation
+
+The market score and CIE (Commodity Intelligence Engine) form **different layers**. Weighted indicators organize today's signals; driver and risk modules interpret them; scenarios and reports describe conditional possibilities. The objective is inspectable reasoning—not a black-box price forecast.
+
+| Analytical layer | Responsibility |
 | --- | --- |
-| **Commodity navigator** | Move across related markets without losing the common analysis framework. |
-| **Market score & factor decomposition** | Start with a compact market-state summary, then inspect the weighted drivers behind it. |
-| **Benchmark, inventory & utilization cards** | Keep import pricing, domestic quotations, stock levels and downstream demand in the same field of view. |
-| **Interactive time-series charts** | Test whether a movement is recent, persistent or at odds with another indicator. |
-| **Supply / Demand / Shipping / Policy tabs** | Follow a specific hypothesis into the underlying market evidence. |
-| **Reports, source and freshness labels** | Separate a research interpretation from the observations—and dates—that support it. |
+| **Market observations** | Dated price, inventory, utilization, FX, freight and policy records, each with source metadata. |
+| **Indicators & market score** | Changes, trends, normalized factor values and a transparent weighted composite. |
+| **Driver and risk engines** | Bullish/bearish pressures, competing evidence, uncertainty and market risks. |
+| **Scenario / forecast modules** | Conditional 7-, 30- and 90-day direction labels; not trained or calibrated price predictions. |
+| **Research & alerts** | Structured market notes, what-changed context and rule-driven monitoring. |
 
-The page is built from reusable **Next.js App Router + React components** for charts, tables, cards and navigation. The read layer returns consistent view models, while the data/analytics layers remain separate from presentation. That separation makes it possible to serve the same interface from a local SQLite database or a sanitized, read-only public snapshot.
+**Market logic example (conceptual, not a verified price forecast):** Middle East FOB ↑ → potential China import-cost pressure ↑; meanwhile China port inventory ↑ → potential domestic stock pressure ↑. The final interpretation depends on actual observations, source quality and the relative strength of each factor.
 
-### The reasoning behind the market model
+## 04 — How the platform works
 
-A change in Middle East FOB quotations may affect China’s import cost, but domestic price formation can also depend on port inventory, landed freight, exchange rates and downstream operating rates. **A higher upstream price is not, by itself, proof of a bullish domestic market.**
+![Architecture map: data sources, normalization, local SQLite, analytics, CIE and read-only Netlify delivery](docs/assets/cit-evidence-pipeline.png)
 
-CIT therefore uses a layered workflow: **observations → normalized indicators → transparent factor scores → market drivers and risks → conditional scenarios → research output.** The market score provides an orientation, not a substitute for the supporting evidence; the intelligence engine is designed to expose assumptions and uncertainties rather than manufacture certainty.
+The application was built **data-source first**: adapters normalize permitted public data and manual observations, then validation and provenance layers create structured historical records. The local analytics stack computes indicators, market scores, drivers and reports. A sanitized snapshot provides the **same interactive product interface** to public visitors without exposing maintenance functions.
 
 <details>
-<summary><strong>Engineering decisions and trade-offs</strong></summary>
+<summary><strong>Explore the engineering architecture and key choices</strong></summary>
 
-| Decision | Rationale |
-| --- | --- |
-| **Source-first adapters** | Each publisher has different formats, schedules and access rules; adapters isolate collection from analysis. |
-| **SQLite for the full local terminal** | Lightweight, persistent history with migrations, without operating a separate database server for a single-user research workstation. |
-| **Explicit provenance and quality** | Avoid conflating manual entries, seeded history, verified public observations and proxy indicators. |
-| **Rule-based intelligence before price ML** | Provide inspectable drivers and scenarios without claiming model accuracy unsupported by reliable training and backtest data. |
-| **Multi-commodity configuration** | Reuse core logic while keeping commodity-specific indicators, supply chains and driver weights configurable. |
-| **Public read-only snapshot mode** | Share the real interactive interface online without exposing local database writes, scheduling controls or paid AI keys. |
-
-</details>
-
-## What CIT Does
-
-| Capability | What you can explore |
-| --- | --- |
-| **Multi-commodity workspace** | Configurable commodity views, including sulphur, crude oil, natural gas and macro indicators; additional industries can be registered without rebuilding the core UI. |
-| **Price intelligence** | Interactive price series, history ranges, trend and momentum views, comparative benchmarks, spreads and import-cost analysis. |
-| **Supply, demand & logistics** | Inventory, downstream utilization, shipping, import-cost and other commodity-specific indicators where data is available. |
-| **Market drivers & risk** | Transparent market scoring, directional drivers, risk categories, conditional scenarios and rule-based outlooks. |
-| **Provenance & quality** | Observation dates, source classification, freshness warnings, manual/derived status and anomaly checks. |
-| **Alerts & research** | Rule-based monitoring and structured research reports in the full local application; previously saved outputs can be explored in the public demo. |
-
-### The research workflow
-
-**Collect → Validate → Normalize → Store → Analyze → Explain → Report**
-
-The purpose is not simply to display commodity prices. CIT connects observations to their underlying market drivers, preserves the evidence behind conclusions, and makes data-quality limitations visible.
-
-## System Architecture
-
-```mermaid
-flowchart TD
-    A[Public / configured market sources] --> B[Adapters and normalization]
-    B --> C[Validation and provenance]
-    C --> D[(Local SQLite history)]
-    D --> E[Indicators and market analytics]
-    E --> F[Commodity Intelligence Engine]
-    F --> G[Drivers · Risks · Scenarios · Reports]
-    G --> H[Local interactive terminal]
-    D --> I[Validated public snapshot export]
-    G --> I
-    I --> J[Netlify read-only web demo]
-```
-
-The system intentionally separates **data collection**, **market calculations**, **intelligence logic**, and **presentation**. The public demo is a deployment mode of the existing application—not a separate mock dashboard.
-
-<details>
-<summary><strong>Engineering architecture & core modules</strong></summary>
-
-| Layer | Implementation |
-| --- | --- |
-| Frontend | Next.js App Router, React, TypeScript, interactive chart and table components |
-| Data access | `src/server/queries.ts` and typed repositories; UI components do not directly query SQL |
-| Persistence | `node:sqlite`, additive migrations, observation history and report storage |
-| Ingestion | Commodity-specific adapters, scheduled checks, normalization, source metadata and quality validation |
-| Analytics | Changes, volatility, market score, price drivers, spreads, import parity and alerts |
-| Intelligence | Driver, risk, confidence, scenario, forecast, research, explanation and market-memory modules |
-| Public delivery | Sanitized JSON snapshot + read-only Next.js deployment on Netlify |
-
-Key directories:
-
-```text
-src/
-  app/                  Next.js commodity and system routes
-  adapters/             Source-specific data integrations
-  components/           Charts, tables and dashboard components
-  config/commodities/   Per-commodity configuration
-  intelligence/         Market intelligence engines
-  lib/db/               SQLite, migrations and repositories
-  lib/engines/          Indicators, scores, quality and alerts
-  lib/public-data/      Snapshot export and read-only provider
-  server/               Query and action boundaries
-scripts/                Data export and developer utilities
-public-data/            Validated public-demo snapshot
-```
-
-</details>
-
-## Two Operating Modes
-
-| | Full local terminal | Public interactive demo |
+| System | Where it lives | Design rationale |
 | --- | --- | --- |
-| Web interface and interactive charts | Yes | Yes |
-| Historical observations and saved reports | SQLite-backed | Snapshot-backed |
-| Data ingestion and scheduling | Runs while local server is active | Disabled |
-| Manual data entry and admin writes | Available locally | Disabled |
-| Intelligence computation | Existing local engines | Existing exported results |
-| Persistent writable database | Local SQLite | No |
+| **Next.js / React UI** | `src/app/`, `src/components/` | Reusable commodity pages, data cards, time-series charts, tables and interactions. |
+| **Commodity configuration** | `src/config/commodities/` | Extend markets without rewriting core analytics or layout. |
+| **Source adapters** | `src/adapters/`, `src/lib/data-sources/` | Different publishers need separate retrieval, normalization and licensing rules. |
+| **SQLite data layer** | `src/lib/db/` | Offline-friendly persistence, migration history, source registry, observations and reports. |
+| **Indicators & alerts** | `src/lib/engines/` | Derived metrics, score composition, data quality, spreads, import-cost logic and rule alerts. |
+| **Commodity intelligence** | `src/intelligence/` | Driver, risk, confidence, scenario, explanation, memory and research components. |
+| **Read-only public delivery** | `src/lib/public-data/`, `public-data/` | Publish selected snapshot content without exposing the writable local database. |
 
-This distinction is intentional: public visitors can explore the product without receiving privileged access to its data maintenance or execution workflows.
+**Why SQLite instead of a managed database?** The initial full terminal is local-first, and does not need an always-on database service for a single-user research workflow. **Why rule-based intelligence before ML prediction?** Reliable forward validation requires sufficient authentic history and backtesting; producing precise numbers without that evidence would be misleading. **Why source metadata everywhere?** A recently exported snapshot is not proof that an underlying commodity quote is recent.
 
-## Run Locally
+</details>
+
+## 05 — What works online vs. locally
+
+| Capability | Full local terminal | Public interactive demo |
+| --- | :---: | :---: |
+| Commodity navigation and charts | ✅ | ✅ |
+| Historical observations and saved analyses | SQLite-backed | Snapshot-backed |
+| Supply / demand / shipping / policy views | ✅ | Read-only |
+| CIE and analytical computation | Local engines | Previously generated/exported output |
+| Background fetch and scheduled report generation | While local server runs | Disabled |
+| Manual inputs, admin settings and database writes | Available locally | Disabled |
+
+The publicly deployed interface is deliberately a **safe product experience**. It is not a continuously updated market-data service, and its historical sample includes material that is unsuitable for live trade decisions.
+
+## 06 — Run the full system locally
 
 **Requirements:** Node.js 22+ and npm.
 
 ```bash
-# Full local application
 npm install
 npm run dev
-# Open http://localhost:3000/sulphur/overview
+# Visit http://localhost:3000/sulphur/overview
 ```
 
+To export a fresh, sanitized public snapshot from the existing local database:
+
 ```bash
-# Export and test the read-only public demo using the local database
 npm run export:public-demo
 npm run build:public-demo
 npm run start:public-demo
-# Open http://localhost:3001
+# Visit http://localhost:3001
 ```
 
-Useful checks:
+For verification:
 
 ```bash
 npm run typecheck
 npm run lint
 npm run build
-node scripts/inspect-db.mjs
 ```
 
-The export command requires an existing local database and is not a substitute for automatic data collection in the hosted environment. Database files and secrets must not be committed to Git.
+See [`docs/PUBLIC_DEMO_DEPLOYMENT.md`](docs/PUBLIC_DEMO_DEPLOYMENT.md), [`docs/PUBLIC_DEMO_LIMITATIONS.md`](docs/PUBLIC_DEMO_LIMITATIONS.md) and [`ARCHITECTURE.md`](ARCHITECTURE.md) for detailed development notes.
 
-## Data Integrity & Limitations
+## 07 — Next research and engineering steps
 
-- **Not a live-price feed:** The public build exposes a dated snapshot; the export timestamp is not the market observation timestamp.
-- **Synthetic data:** Seeded sulphur history exists for development and demonstration and must not be interpreted as verified historical market assessments.
-- **Source coverage varies:** Some adapters retrieve public data; certain physical commodity benchmarks and downstream indicators require manual updates or licensed access.
-- **Model outputs are conditional:** Market scores, risk levels and scenario outlooks are research tools, not calibrated price probabilities or investment recommendations.
-- **No privileged public operations:** Public visitors cannot write data, change admin settings, start ingestion jobs or invoke unrestricted cloud AI.
-
-See [Public Demo Limitations](docs/PUBLIC_DEMO_LIMITATIONS.md), [Public Demo Deployment](docs/PUBLIC_DEMO_DEPLOYMENT.md), [Architecture](ARCHITECTURE.md) and [CIE Documentation](docs/CIE.md).
-
-## Direction of Development
-
-The next priorities are to expand **verified public market coverage**, automate safe snapshot refreshes, strengthen **industry-chain relationships**, and validate intelligence signals against reliable historical data—without compromising source provenance or reproducibility.
+- Expand authentic source coverage for sulphur, fertilizer and adjacent commodity markets, respecting publisher licensing and automated-access rules.
+- Add reliable, independently scheduled cloud ingestion when the product requires fresher data than a read-only snapshot can provide.
+- Validate score components and scenario interpretations with genuine historical data, explicit uncertainty handling and out-of-sample testing.
+- Extend structured commodity-dependency knowledge and improve the relationship between source evidence, price drivers and research reports.
 
 ---
 
 <div align="center">
 
-**From fragmented commodity observations to explainable market intelligence.**
+**[Explore the live CIT dashboard](https://commodity-intelligence-cit.netlify.app/)**
 
-[**Explore CIT Live ↗**](https://commodity-intelligence-cit.netlify.app/)
+*Built as a functional commodity research system. Public access is read-only and snapshot-based.*
 
 </div>
